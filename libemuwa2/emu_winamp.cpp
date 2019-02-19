@@ -18,9 +18,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  */
-#include <stdio.h>
-#include <windows.h>
 #include "emu_winamp.h"
+#include <stdio.h>
 
 //DUMMY FUNCTIONS
 static void SAVSAInit(int maxlatency_in_ms, int srate){}

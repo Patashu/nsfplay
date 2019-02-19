@@ -4,6 +4,7 @@
 #ifdef _MSC_VER
 #include <crtdbg.h>
 #define _CRTDBG_MAP_ALLOC
+struct IUnknown;
 #include <windows.h>
 #include <stdio.h>
 #include <stdarg.h>

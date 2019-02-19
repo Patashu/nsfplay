@@ -33,7 +33,7 @@ namespace xgm
      * タイトルの取得
      * @return タイトル情報
      */
-    virtual char *GetTitleString(const char *format=NULL){ return ""; }
+    virtual const char *GetTitleString(const char *format=NULL){ return ""; }
 
     /**
      * タイトルの設定

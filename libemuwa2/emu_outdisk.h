@@ -2,6 +2,7 @@
  * emu_outdisk.h
  */
 #pragma once
+struct IUnknown;
 #include <windows.h>
 #include <mmsystem.h>
 

@@ -1,5 +1,6 @@
 #ifndef _IN_MODULE_H_
 #define _IN_MODULE_H_
+struct IUnknown;
 #include <windows.h>
 #include <crtdbg.h>
 #include <stdio.h>

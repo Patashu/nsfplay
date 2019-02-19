@@ -10,6 +10,7 @@
 #include <list>
 #include <set>
 
+struct IUnknown;
 #include <windows.h> // for thread safety
 
 namespace vcm

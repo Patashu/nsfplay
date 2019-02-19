@@ -8,7 +8,7 @@ namespace xgm
 {
   struct NSFE_Entry
   {
-    char* tlbl;
+    const char* tlbl;
     INT32 time;
     INT32 fade;
   };
@@ -35,11 +35,11 @@ namespace xgm
     char title_nsf[32];
     char artist_nsf[32];
     char copyright_nsf[32];
-    char* title;
-    char* artist;
-    char* copyright;
-    char* ripper; // NSFe only
-    char* text; // NSFe only
+    const char* title;
+    const char* artist;
+    const char* copyright;
+    const char* ripper; // NSFe only
+    const char* text; // NSFe only
     UINT32 text_len; // NSFe only
     UINT16 speed_ntsc;
     UINT8 bankswitch[8];

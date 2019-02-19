@@ -7,12 +7,12 @@
 typedef struct 
 {
 	int version;				// module type (IN_VER)
-	char *description;			// description of module, with version string
+	const char *description;	// description of module, with version string
 
 	HWND hMainWindow;			// winamp's main window (filled in by winamp)
 	HINSTANCE hDllInstance;		// DLL instance handle (Also filled in by winamp)
 
-	char *FileExtensions;		// "mp3\0Layer 3 MPEG\0mp2\0Layer 2 MPEG\0mpg\0Layer 1 MPEG\0"
+	const char *FileExtensions;	// "mp3\0Layer 3 MPEG\0mp2\0Layer 2 MPEG\0mpg\0Layer 1 MPEG\0"
 								// May be altered from Config, so the user can select what they want
 	
 	int is_seekable;			// is this stream seekable? 

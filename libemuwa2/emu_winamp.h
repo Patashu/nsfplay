@@ -19,6 +19,7 @@
  *
  */
 #pragma once
+struct IUnknown;
 #include <windows.h>
 #include "emu_outmod.h"
 #include "emu_outdisk.h"

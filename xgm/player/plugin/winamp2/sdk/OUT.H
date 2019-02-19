@@ -3,7 +3,7 @@
 typedef struct 
 {
 	int version;				// module version (OUT_VER)
-	char *description;			// description of module, with version string
+	const char *description;	// description of module, with version string
 	int id;						// module id. each input module gets its own. non-nullsoft modules should
 								// be >= 65536. 
 

@@ -19,6 +19,7 @@
  *
  */
 #pragma once
+struct IUnknown;
 #include <windows.h>
 #include "winamp2/IN2.H"
 

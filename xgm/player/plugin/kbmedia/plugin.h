@@ -1,5 +1,6 @@
 #ifndef _KBM_PLUGIN_H_
 #define _KBM_PLUGIN_H_
+struct IUnknown;
 #include <windows.h>
 #include "sdk/kmp_pi.h"
 #include "../../player.h"
@@ -41,7 +42,7 @@ public:
       return false;
     
     // KbMediaPlayer‚ÌÄ¶ƒŒ[ƒg—v‹‚É‰ž‚¶‚é
-    rate = pInfo->dwSamplesPerSec?pInfo->dwSamplesPerSec:(*cf)["RATE"];
+    rate = pInfo->dwSamplesPerSec?pInfo->dwSamplesPerSec:(DWORD)((*cf)["RATE"]);
     nch = (*cf)["NCH"];
     pl->SetPlayFreq(rate);
     pl->SetChannels(pInfo->dwChannels);

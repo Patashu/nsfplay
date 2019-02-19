@@ -1,5 +1,6 @@
 #ifndef _IN_NSF_H_
 #define _IN_NSF_H_
+struct IUnknown;
 #include <windows.h>
 #include "xgm.h"
 #include "utils/nsf_tag.h"

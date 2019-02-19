@@ -113,9 +113,9 @@ END_MESSAGE_MAP()
 
 // NSFTrackDialog メッセージ ハンドラ
 
-inline static char *note2string(int note)
+inline static const char *note2string(int note)
 {
-  static char *notename[12]=
+  static const char *notename[12]=
   {
     "C ","C#","D ","D#",
     "E ","F ","F#","G ",
@@ -949,28 +949,28 @@ COLORREF NSFTrackDialog::ColorForWave(int wavelen, xgm::INT16 wave[])
 		switch ((int)(dutycycle*16))
 		{
 			case 0:
-				return RGBgrayify(240, 0, 240-120*dutycycleremainder, desaturateamount);
+				return RGBgrayify(240, 0, (byte)(240-120*dutycycleremainder), desaturateamount);
 			break;
 			case 1:
-				return RGBgrayify(240, 0, 120-120*dutycycleremainder, desaturateamount);
+				return RGBgrayify(240, 0, (byte)(120-120*dutycycleremainder), desaturateamount);
 			break;
 			case 2:
-				return RGBgrayify(240, 120*dutycycleremainder, 0, desaturateamount);
+				return RGBgrayify(240, (byte)(120*dutycycleremainder), 0, desaturateamount);
 			break;
 			case 3:
-				return RGBgrayify(240, 120+120*dutycycleremainder, 0, desaturateamount);
+				return RGBgrayify(240, (byte)(120+120*dutycycleremainder), 0, desaturateamount);
 			break;
 			case 4:
-				return RGBgrayify(240-240*dutycycleremainder, 240, 0, desaturateamount);
+				return RGBgrayify((byte)(240-240*dutycycleremainder), 240, 0, desaturateamount);
 			break;
 			case 5:
-				return RGBgrayify(0, 240, 240*dutycycleremainder, desaturateamount);
+				return RGBgrayify(0, 240, (byte)(240*dutycycleremainder), desaturateamount);
 			break;
 			case 6:
-				return RGBgrayify(0, 240-240*dutycycleremainder, 240, desaturateamount);
+				return RGBgrayify(0, (byte)(240-240*dutycycleremainder), 240, desaturateamount);
 			break;
 			case 7:
-				return RGBgrayify(120*dutycycleremainder, 0, 240, desaturateamount);
+				return RGBgrayify((byte)(120*dutycycleremainder), 0, 240, desaturateamount);
 			break;
 			case 8:
 				return RGBgrayify(120, 0, 240, desaturateamount);
@@ -986,7 +986,7 @@ void NSFTrackDialog::InitList()
 {
   NSF *nsf = pm->pl->nsf;
   int i,j; 
-  char *tname[][16] = { 
+  const char *tname[][16] = { 
     {"SQR0","SQR1","TRI","NOISE","DMC",NULL},
     {"FDS",NULL},
     {"MMC5:0","MMC5:1","MMC5:P",NULL},
@@ -1077,7 +1077,7 @@ BOOL NSFTrackDialog::OnInitDialog()
   HICON hIcon = AfxGetApp()->LoadIcon(IDI_NSF);
   SetIcon(hIcon, TRUE);
 
-  char *cname[] = { "Track  ", "Vol", "     Freq", "Key", "Oct", "Tone", "Wave", NULL };
+  const char *cname[] = { "Track  ", "Vol", "     Freq", "Key", "Oct", "Tone", "Wave", NULL };
 
   m_pDCtrk = m_trkinfo.GetDC();
   for(int i=0; cname[i]!=NULL; i++)
