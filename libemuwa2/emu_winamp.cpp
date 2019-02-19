@@ -69,7 +69,7 @@ LRESULT CALLBACK EmuWinamp::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
   return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
-EmuWinamp::EmuWinamp(char *dll_name) {
+EmuWinamp::EmuWinamp(const char *dll_name) {
 
   m_dll = LoadLibrary(dll_name);
   if(m_dll==NULL)
