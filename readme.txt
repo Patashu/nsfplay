@@ -1,3 +1,11 @@
+This branch of NSFPlay includes changes from Patashu's NSFPlay Synthesia build and tracks changes from the upstream branch.
+
+The original FamiTracker forum thread for NSFPlay Synthesia is available at: http://forums.famitracker.com/viewtopic.php?t=101
+
+The original readme text is included below:
+
+
+
 NSFPlay/NSFPlug 2.3 source code 7/19/2013
 
 This code is maintained by Brad Smith. It is a fork of NSFPlay/NSFPlug by Brezza. The latest version should be available at:
