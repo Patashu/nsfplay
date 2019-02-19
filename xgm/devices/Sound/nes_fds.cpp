@@ -109,11 +109,11 @@ void NES_FDS::Reset ()
     //   $4023 = $00
     //   $4023 = $83 enables master_io
     //   $4080 = $80 output volume = 0, envelope disabled
-    //   $408A = $FF master envelope speed set to slowest
+    //   $408A = $E8 master envelope speed
     Write(0x4023, 0x00);
     Write(0x4023, 0x83);
     Write(0x4080, 0x80);
-    Write(0x408A, 0xFF);
+    Write(0x408A, 0xE8);
 
     // reset other stuff
     Write(0x4082, 0x00); // wav freq 0
@@ -342,9 +342,9 @@ bool NES_FDS::Write (UINT32 adr, UINT32 val, UINT32 id)
         if (mod_halt)
         {
             // writes to current playback position (there is no direct way to set phase)
-            wave[TMOD][(phase[TMOD] >> 16) & 0x3F] = val & 0x7F;
+            wave[TMOD][(phase[TMOD] >> 16) & 0x3F] = val & 0x07;
             phase[TMOD] = (phase[TMOD] + 0x010000) & 0x3FFFFF;
-            wave[TMOD][(phase[TMOD] >> 16) & 0x3F] = val & 0x7F;
+            wave[TMOD][(phase[TMOD] >> 16) & 0x3F] = val & 0x07;
             phase[TMOD] = (phase[TMOD] + 0x010000) & 0x3FFFFF;
             mod_write_pos = phase[TMOD] >> 16; // used by OPT_4085_RESET
         }
@@ -369,7 +369,7 @@ bool NES_FDS::Write (UINT32 adr, UINT32 val, UINT32 id)
 
 bool NES_FDS::Read (UINT32 adr, UINT32 & val, UINT32 id)
 {
-    if (adr >= 0x4040 && adr < 0x407F)
+    if (adr >= 0x4040 && adr <= 0x407F)
     {
         // TODO: if wav_write is not enabled, the
         // read address may not be reliable? need

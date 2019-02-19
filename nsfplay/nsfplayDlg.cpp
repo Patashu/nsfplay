@@ -151,7 +151,10 @@ BOOL CnsfplayDlg::OnInitDialog()
     m_emu->SetVolume(v);
     
     if(m_init_file.GetLength()) {
-      m_emu->Play(m_init_file.GetBuffer());
+      if(m_emu->Play(m_init_file.GetBuffer()))
+      {
+        MessageBox("Unable to read file.","Error reading file!",MB_ICONEXCLAMATION | MB_OK);
+      }
       m_update_wait = 0;
     }
 
@@ -222,7 +225,10 @@ void CnsfplayDlg::OnDropFiles(HDROP hDropInfo)
     nSize = DragQueryFile(hDropInfo, 0, NULL, 0);
     aryFile.SetSize(nSize+1);
     DragQueryFile(hDropInfo, 0, aryFile.GetData(), nSize+1);
-    m_emu->Play(aryFile.GetData());
+    if (m_emu->Play(aryFile.GetData()))
+    {
+      MessageBox("Unable to read file.","Error reading file!",MB_ICONEXCLAMATION | MB_OK);
+    }
     m_last_len = -1;
     m_update_wait = 0;
   }

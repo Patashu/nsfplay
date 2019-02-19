@@ -13,6 +13,8 @@ namespace xgm
     INT32 fade;
   };
   const unsigned int NSFE_ENTRIES = 256;
+  const unsigned int NSFE_MIXES = 8;
+  const INT16 NSFE_MIXE_DEFAULT = 32767;
 
   /**
    * NSFファイル型
@@ -23,6 +25,7 @@ namespace xgm
     char magic[5];
     UINT8 version;
     UINT8 songs;
+    UINT8 total_songs;
     UINT8 start;
     UINT16 load_address;
     UINT16 init_address;
@@ -56,6 +59,11 @@ namespace xgm
     UINT8* nsfe_plst;
     int nsfe_plst_size;
     NSFE_Entry nsfe_entry[NSFE_ENTRIES];
+    INT16 nsfe_mixe[NSFE_MIXES];
+    UINT16 speed_dendy;
+    UINT8 regn;
+    int regn_pref;
+    UINT8 nsf2_bits;
 
     /** 現在選択中の曲番号 */
     int song;
@@ -89,8 +97,8 @@ namespace xgm
     // loads NSF (or NSFe via LoadNSFe)
     bool Load (UINT8 * image, UINT32 size);
 
-    // loads NSFe, if info is false INFO chunk is required to initialize
-    bool LoadNSFe(UINT8* image, UINT32 size, bool info);
+    // loads NSFe, or NSFe suffix for NSF2
+    bool LoadNSFe(UINT8* image, UINT32 size, bool nsf2);
 
     void DebugOut ();
     /**
