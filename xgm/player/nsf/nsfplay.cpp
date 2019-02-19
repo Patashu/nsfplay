@@ -460,7 +460,8 @@ namespace xgm
         int cpu_clocks = (int)(cpu_clock_rest);
         if (cpu_clocks > 0)
         {
-            UINT32 real_cpu_clocks = cpu.Exec ( cpu_clocks );
+            bool frameElapsed;
+            UINT32 real_cpu_clocks = cpu.Exec ( cpu_clocks, &frameElapsed );
             cpu_clock_rest -= (double)(real_cpu_clocks);
 
             // tick APU frame sequencer
@@ -578,7 +579,12 @@ namespace xgm
       int cpu_clocks = (int)(cpu_clock_rest);
       if (cpu_clocks > 0)
       {
-          UINT32 real_cpu_clocks = cpu.Exec ( cpu_clocks );
+          bool frameElapsed;
+          UINT32 real_cpu_clocks = cpu.Exec ( cpu_clocks, &frameElapsed );
+          if (frameElapsed)
+          {
+              UpdateInfo();
+          }
           cpu_clock_rest -= (double)(real_cpu_clocks);
 
           // tick APU frame sequencer
