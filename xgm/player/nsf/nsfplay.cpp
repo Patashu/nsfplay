@@ -438,9 +438,9 @@ namespace xgm
     fds->SetMask( (*config)["MASK"].GetInt()>>5 );
     mmc5->SetMask((*config)["MASK"].GetInt()>>6 );
     fme7->SetMask((*config)["MASK"].GetInt()>>9 );
-    vrc6->SetMask((*config)["MASK"].GetInt()>>12);
-    vrc7->SetMask((*config)["MASK"].GetInt()>>15);
-    n106->SetMask((*config)["MASK"].GetInt()>>21);
+    vrc6->SetMask((*config)["MASK"].GetInt()>>14);
+    vrc7->SetMask((*config)["MASK"].GetInt()>>17);
+    n106->SetMask((*config)["MASK"].GetInt()>>23);
 
     vrc7->SetPatchSet((*config)["VRC7_PATCH"].GetInt());
 
@@ -883,15 +883,15 @@ namespace xgm
       fme7->SetMask((*config)["MASK"].GetInt()>>9);
       break;
     case VRC6:
-      vrc6->SetMask((*config)["MASK"].GetInt()>>12);
+      vrc6->SetMask((*config)["MASK"].GetInt()>>14);
       break;
     case VRC7:
-      vrc7->SetMask((*config)["MASK"].GetInt()>>15);
+      vrc7->SetMask((*config)["MASK"].GetInt()>>17);
       break;
     case N106:
       for (i = 0; i < NES_N106::OPT_END; i++)
         n106->SetOption (i, config->GetDeviceOption(id,i));
-      n106->SetMask((*config)["MASK"].GetInt()>>21);
+      n106->SetMask((*config)["MASK"].GetInt()>>23);
       break;
     default:
       break;
