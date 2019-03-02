@@ -1,5 +1,7 @@
 #include <assert.h>
 #include "nes_cpu.h"
+#include "../Memory/nes_mem.h"
+#include "../Misc/nsf2_irq.h"
 
 #define DEBUG_RW 0
 #define TRACE 0
@@ -70,6 +72,10 @@ NES_CPU::NES_CPU (double clock)
   NES_BASECYCLES = clock;
   bus = NULL;
   log_cpu = NULL;
+  irqs = 0;
+  enable_irqs = true;
+  nsf2_bits = 0;
+  nsf2_irq = NULL;
 }
 
 NES_CPU::~NES_CPU ()
@@ -88,60 +94,96 @@ UINT32 Callback readByte (void *__THIS, UINT32 adr)
   return val;
 }
 
-void NES_CPU::startup (UINT32 address)
+void NES_CPU::run_from (UINT32 address)
 {
-  breaked = false;
-  context.PC = 0x4100;
-  breakpoint = context.PC+3;
-  context.P = 0x26;                 // IRZ
-  assert (bus);
-  bus->Write (context.PC+0, 0x20);  // JSR 
-  bus->Write (context.PC+1, address & 0xff);
-  bus->Write (context.PC+2, address>>8);
-  bus->Write (context.PC+3, 0x4c);  // JMP 04103H 
-  bus->Write (context.PC+4, breakpoint & 0xff);
-  bus->Write (context.PC+5, breakpoint>>8);
+	breaked = false;
+	context.PC = PLAYER_RESERVED;
+	breakpoint = context.PC+3;
+	assert (bus);
+	bus->Write (context.PC+1, address & 0xff);
+	bus->Write (context.PC+2, address>>8);
+	// see PLAYER_PROGRAM in nsfplay.cpp
 }
 
 UINT32 NES_CPU::Exec (UINT32 clock)
 {
-  context.clock = 0;
+	context.clock = 0;
 
-  while ( context.clock < clock )
-  {
-    if (!breaked)
-    {
-      //DEBUG_OUT("PC: 0x%04X\n", context.PC);
-      exec(context,bus);
-      if (context.PC == breakpoint)
-        breaked = true;
-    }
-    else 
-    {
-      if ( (clock_of_frame >> FRAME_FIXED) < clock )
-        context.clock = (clock_of_frame >> FRAME_FIXED)+1;
-      else
-        context.clock = clock;
-    }
+	while ( context.clock < clock )
+	{
+		if (breaked)
+		{
+			if (extra_init)
+			{
+				run_from(init_addr);
+				extra_init = false;
+				context.A = song;
+				context.X = region;
+				context.Y = 1;
+			}
 
-    // wait for interrupt
-    if ( (clock_of_frame >> FRAME_FIXED) < context.clock)
-    {
-      if (breaked)
-      {
-        if (log_cpu)
-            log_cpu->Play();
+			if (enable_irqs && !(context.P & K6502_I_FLAG) && context.iRequest)
+			{
+				breaked = false;
+			}
+		}
 
-        startup (int_address);
-      }
-      clock_of_frame += clock_per_frame;
-      //DEBUG_OUT("NMI\n");
-    }
-  }
+		Uword clock_start = context.clock;
+		if (!breaked)
+		{
 
-  clock_of_frame -= (context.clock << FRAME_FIXED);
+			//DEBUG_OUT("PC: 0x%04X\n", context.PC);
+			exec(context,bus);
 
-  return context.clock; // return actual number of clocks executed
+			if (context.PC == breakpoint)
+			{
+				breaked = true;
+			}
+		}
+		else 
+		{
+			if ( (clock_of_frame >> FRAME_FIXED) < clock )
+				context.clock = (clock_of_frame >> FRAME_FIXED)+1;
+			else
+				context.clock = clock;
+		}
+		if (nsf2_irq) nsf2_irq->Clock(context.clock-clock_start);
+
+		if (breaked && play_ready)
+		{
+			if (play_addr >= 0)
+			{
+				if (log_cpu)
+					log_cpu->Play();
+				run_from (play_addr);
+			}
+			play_ready = false;
+		}
+
+		// signal next play
+		if ( (clock_of_frame >> FRAME_FIXED) < context.clock)
+		{
+			if (play_addr >= 0)
+			{
+				if (nmi_play) // trigger play by NMI
+				{
+					if (log_cpu)
+						log_cpu->Play();
+					context.iRequest |= IRQ_NMI;
+					breaked = false;
+					play_ready = false;
+				}
+				else
+					play_ready = true;
+			}
+			clock_of_frame += clock_per_frame;
+			//DEBUG_OUT("NMI\n");
+		}
+	}
+
+	clock_of_frame -= (context.clock << FRAME_FIXED);
+
+	return context.clock; // return actual number of clocks executed
 }
 
 void NES_CPU::SetMemory (IDevice * b)
@@ -212,43 +254,102 @@ void NES_CPU::Reset ()
   context.PC = breakpoint = 0xffff;
   context.illegal = 0;
   breaked = false;
+  irqs = 0;
+  play_ready = false;
   exec(context, bus);
 }
 
-void NES_CPU::Start (int start_adr, int int_adr, double int_freq, int a, int x, int y)
+void NES_CPU::Start (
+	int init_addr_,
+	int play_addr_,
+	double play_rate,
+	int song_,
+	int region_,
+	UINT8 nsf2_bits_,
+	bool enable_irqs_,
+	NSF2_IRQ* nsf2_irq_)
 {
-  // approximate frame timing as an integer number of CPU clocks
-  int_address = int_adr;
-  clock_per_frame = (int)((double)((1 << FRAME_FIXED) * NES_BASECYCLES) / int_freq );
-  clock_of_frame = 0;
+	// approximate frame timing as an integer number of CPU clocks
+	init_addr = init_addr_;
+	play_addr = play_addr_;
+	song = song_;
+	region = region_;
+	clock_per_frame = (int)((double)((1 << FRAME_FIXED) * NES_BASECYCLES) / play_rate );
+	clock_of_frame = 0;
+	play_ready = false;
+	irqs = 0;
+	nsf2_bits = nsf2_bits_;
+	nsf2_irq = nsf2_irq_;
+	enable_irqs = enable_irqs_;
 
-  // count clock quarters
-  frame_quarter = 3;
+	// enable NSF2 IRQ
+	if (nsf2_bits & 0x10) enable_irqs = true;
+	else nsf2_irq = NULL;
 
-  if (log_cpu)
-      log_cpu->Init(a, x);
+	// NSF2 disable PLAY
+	if (nsf2_bits & 0x40)
+	{
+		play_addr = -1;
+	}
 
-  context.A = a;
-  context.X = x;
-  context.Y = y;
-  startup (start_adr);
+	extra_init = false;
+	nmi_play = false;
+	if (nsf2_bits & 0x20)
+	{
+		extra_init = true;
+		nmi_play = true;
+	}
 
-  for (int i = 0; (i < (NES_BASECYCLES / int_freq )) && !breaked; i++, exec(context,bus))
-  {
-    if (context.PC == breakpoint) breaked = true;
-  }
+	if (log_cpu)
+		log_cpu->Init(song, region);
 
-  clock_of_frame = 0;
+	context.A = song;
+	context.X = region;
+	context.Y = 0;
+	context.P = 0x26; // VIZ
+
+	run_from (init_addr);
+
+	// run up to 60 frames of init before starting real playback (this allows INIT to modify $4011 etc. silently)
+	int timeout = int((60.0 * NES_BASECYCLES) / play_rate);
+	// TODO use real exec??
+	for (int i = 0; (i < timeout) && !breaked; i++, exec(context,bus))
+	{
+		if (context.PC == breakpoint)
+		{
+			breaked = true;
+		}
+	}
+
+	clock_of_frame = 0;
+	play_ready = breaked && !extra_init;
 }
 
 void NES_CPU::SetLogger (CPULogger* logger)
 {
-    log_cpu = logger;
+	log_cpu = logger;
 }
 
 unsigned int NES_CPU::GetPC() const
 {
-    return context.PC;
+	return context.PC;
+}
+
+void NES_CPU::UpdateIRQ(int device, bool irq)
+{
+	if (!enable_irqs) return;
+	if (device < 0 || device >= IRQD_COUNT) return;
+	UINT32 mask = 1 << device;
+	irqs &= ~mask;
+	if (irq) irqs |= mask;
+	if (irqs)
+	{
+		context.iRequest |= IRQ_INT;
+	}
+	else
+	{
+		context.iRequest &= ~Uword(IRQ_INT);
+	}
 }
 
 } // namespace xgm
