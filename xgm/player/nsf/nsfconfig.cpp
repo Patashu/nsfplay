@@ -77,7 +77,7 @@ NSFPlayerConfig::NSFPlayerConfig () : PlayerConfig ()
 {
   int i, j;
 
-  CreateValue("RATE", 44100);
+  CreateValue("RATE", 48000);
   CreateValue("NCH",  2);
   CreateValue("BPS",  16);
   CreateValue("MASK", 0);
@@ -111,6 +111,7 @@ NSFPlayerConfig::NSFPlayerConfig () : PlayerConfig ()
   CreateValue("NTSC_BASECYCLES", 1789773);
   CreateValue("PAL_BASECYCLES", 1662607);
   CreateValue("DENDY_BASECYCLES", 1773448);
+  CreateValue("IRQ_ENABLE", 1);
   CreateValue("REGION", 0);
   CreateValue("LOG_CPU", 0);
   CreateValue("LOG_CPU_FILE", "nsf_write.log");
