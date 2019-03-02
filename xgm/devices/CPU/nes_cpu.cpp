@@ -105,7 +105,7 @@ void NES_CPU::run_from (UINT32 address)
 	// see PLAYER_PROGRAM in nsfplay.cpp
 }
 
-UINT32 NES_CPU::Exec (UINT32 clock)
+UINT32 NES_CPU::Exec (UINT32 clock, bool *frameElapsed)
 {
 	context.clock = 0;
 
@@ -163,6 +163,7 @@ UINT32 NES_CPU::Exec (UINT32 clock)
 		// signal next play
 		if ( (clock_of_frame >> FRAME_FIXED) < context.clock)
 		{
+			*frameElapsed = true;
 			if (play_addr >= 0)
 			{
 				if (nmi_play) // trigger play by NMI

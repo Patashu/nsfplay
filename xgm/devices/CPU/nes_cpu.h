@@ -56,7 +56,7 @@ public:
     UINT8 nsf2_bits_,
     bool enable_irqs_,
     NSF2_IRQ* nsf2_irq_);
-  UINT32 Exec (UINT32 clock); // returns number of clocks executed
+  UINT32 Exec (UINT32 clock, bool *frameElapsed); // returns number of clocks executed and if it passed a frame boundary or not
   void SetMemory (IDevice *);
   bool Read (UINT32 adr, UINT32 & val, UINT32 id=0);
   bool Write (UINT32 adr, UINT32 val, UINT32 id=0);
