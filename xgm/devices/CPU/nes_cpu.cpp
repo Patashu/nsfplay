@@ -142,8 +142,8 @@ UINT32 NES_CPU::Exec (UINT32 clock, bool *frameElapsed)
 		}
 		else 
 		{
-			if ( (clock_of_frame >> FRAME_FIXED) < clock )
-				context.clock = (clock_of_frame >> FRAME_FIXED)+1;
+			if ( (fclocks_left_in_frame >> FRAME_FIXED) < clock )
+				context.clock = (fclocks_left_in_frame >> FRAME_FIXED)+1;
 			else
 				context.clock = clock;
 		}
@@ -161,7 +161,7 @@ UINT32 NES_CPU::Exec (UINT32 clock, bool *frameElapsed)
 		}
 
 		// signal next play
-		if ( (clock_of_frame >> FRAME_FIXED) < context.clock)
+		if ( (fclocks_left_in_frame >> FRAME_FIXED) < context.clock)
 		{
 			*frameElapsed = true;
 			if (play_addr >= 0)
@@ -175,14 +175,16 @@ UINT32 NES_CPU::Exec (UINT32 clock, bool *frameElapsed)
 					play_ready = false;
 				}
 				else
+				{
 					play_ready = true;
+				}
 			}
-			clock_of_frame += clock_per_frame;
+			fclocks_left_in_frame += fclocks_per_frame;
 			//DEBUG_OUT("NMI\n");
 		}
 	}
 
-	clock_of_frame -= (context.clock << FRAME_FIXED);
+	fclocks_left_in_frame -= (context.clock << FRAME_FIXED);
 
 	return context.clock; // return actual number of clocks executed
 }
@@ -275,8 +277,8 @@ void NES_CPU::Start (
 	play_addr = play_addr_;
 	song = song_;
 	region = region_;
-	clock_per_frame = (int)((double)((1 << FRAME_FIXED) * NES_BASECYCLES) / play_rate );
-	clock_of_frame = 0;
+	fclocks_per_frame = (int)((double)((1 << FRAME_FIXED) * NES_BASECYCLES) / play_rate );
+	fclocks_left_in_frame = 0;
 	play_ready = false;
 	irqs = 0;
 	nsf2_bits = nsf2_bits_;
@@ -322,7 +324,7 @@ void NES_CPU::Start (
 		}
 	}
 
-	clock_of_frame = 0;
+	fclocks_left_in_frame = fclocks_per_frame;
 	play_ready = breaked && !extra_init;
 }
 
