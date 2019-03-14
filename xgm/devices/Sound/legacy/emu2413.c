@@ -76,7 +76,7 @@ static unsigned char default_inst[OPLL_TONE_NUM][(16 + 3) * 16] = {
   },
   {
 #include "281btone.h"
-  }
+  },
 };
 
 /* Size of Sintable ( 8 -- 18 can be used. 9 recommended.) */
@@ -1022,6 +1022,24 @@ OPLL_reset_patch (OPLL * opll, e_int32 type)
     OPLL_copyPatch (opll, i, &default_patch[type % OPLL_TONE_NUM][i]);
 }
 
+const e_uint8 zero_dump[8] = { 0,0,0,0,0,0,0,0 };
+
+void
+OPLL_reset_patch_custom_VRC7 (OPLL * opll, const e_uint8* data)
+{
+  // 16 x 8 byte VRC7 style patch dump
+  e_int32 i;
+  OPLL_PATCH patch[2];
+  for (i = 0; i < 19; ++i)
+  {
+    const e_uint8* dump = data + (i*8);
+    if (i >= 16) dump = zero_dump;
+    OPLL_dump2patch(dump, patch);
+    OPLL_copyPatch(opll, (i*2)+0, &patch[0]);
+    OPLL_copyPatch(opll, (i*2)+1, &patch[1]);
+  }
+}
+
 /* Reset whole of OPLL except patch datas. */
 void
 OPLL_reset (OPLL * opll)
@@ -1316,7 +1334,6 @@ calc_slot_tom (OPLL_SLOT * slot)
     return 0;
 
   return DB2LIN_TABLE[slot->sintbl[slot->pgout] + slot->egout];
-
 }
 
 /* SNARE */
@@ -1427,10 +1444,13 @@ calc (OPLL * opll)
   }
   else
   {
+    opll->out_hat = 0;
+    opll->out_snare = 0;
     if (!(opll->mask & OPLL_MASK_HH) && (MOD(opll,7)->eg_mode != FINISH))
-      perc += calc_slot_hat (MOD(opll,7), CAR(opll,8)->pgout, opll->noise_seed&1);
+      opll->out_hat = calc_slot_hat (MOD(opll,7), CAR(opll,8)->pgout, opll->noise_seed&1);
     if (!(opll->mask & OPLL_MASK_SD) && (CAR(opll,7)->eg_mode != FINISH))
-      perc -= calc_slot_snare (CAR(opll,7), opll->noise_seed&1);
+      opll->out_snare = calc_slot_snare (CAR(opll,7), opll->noise_seed&1);
+    perc += opll->out_hat - opll->out_snare;
   }
 
   /* CH8 */
@@ -1441,10 +1461,13 @@ calc (OPLL * opll)
   }
   else
   {
+    opll->out_tom = 0;
+    opll->out_cym = 0;
     if (!(opll->mask & OPLL_MASK_TOM) && (MOD(opll,8)->eg_mode != FINISH))
-      perc += calc_slot_tom (MOD(opll,8));
+      opll->out_tom = calc_slot_tom (MOD(opll,8));
     if (!(opll->mask & OPLL_MASK_CYM) && (CAR(opll,8)->eg_mode != FINISH))
-      perc -= calc_slot_cym (CAR(opll,8), MOD(opll,7)->pgout);
+      opll->out_cym = calc_slot_cym (CAR(opll,8), MOD(opll,7)->pgout);
+    perc += opll->out_tom - opll->out_cym;
   }
 
   out = inst + (perc << 1);

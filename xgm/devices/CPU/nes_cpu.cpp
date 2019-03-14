@@ -69,11 +69,12 @@ const int FRAME_FIXED = 14;
 
 NES_CPU::NES_CPU (double clock)
 {
-  NES_BASECYCLES = clock;
+  nes_basecycles = clock;
   bus = NULL;
   log_cpu = NULL;
   irqs = 0;
-  enable_irqs = true;
+  enable_irq = true;
+  enable_nmi = false;
   nsf2_bits = 0;
   nsf2_irq = NULL;
 }
@@ -97,32 +98,35 @@ UINT32 Callback readByte (void *__THIS, UINT32 adr)
 void NES_CPU::run_from (UINT32 address)
 {
 	breaked = false;
-	context.PC = PLAYER_RESERVED;
+	context.PC = PLAYER_RESERVED; // JSR, followed by infinite loop ("breaked")
 	breakpoint = context.PC+3;
 	assert (bus);
-	bus->Write (context.PC+1, address & 0xff);
-	bus->Write (context.PC+2, address>>8);
+	bus->Write (PLAYER_RESERVED+1, address & 0xff);
+	bus->Write (PLAYER_RESERVED+2, address>>8);
 	// see PLAYER_PROGRAM in nsfplay.cpp
 }
 
-UINT32 NES_CPU::Exec (UINT32 clock)
+int NES_CPU::Exec (int clocks)
 {
-	context.clock = 0;
+	// DPCM cycle stealing
+	context.clock = stolen_cycles;
+	stolen_cycles = 0;
 
-	while ( context.clock < clock )
+	while ( int(context.clock) < clocks )
 	{
 		if (breaked)
 		{
 			if (extra_init)
 			{
-				run_from(init_addr);
+				enable_nmi = true;
 				extra_init = false;
 				context.A = song;
 				context.X = region;
-				context.Y = 1;
+				context.Y = 0x81;
+				run_from(init_addr);
 			}
 
-			if (enable_irqs && !(context.P & K6502_I_FLAG) && context.iRequest)
+			if (enable_irq && !(context.P & K6502_I_FLAG) && context.iRequest)
 			{
 				breaked = false;
 			}
@@ -131,10 +135,8 @@ UINT32 NES_CPU::Exec (UINT32 clock)
 		Uword clock_start = context.clock;
 		if (!breaked)
 		{
-
 			//DEBUG_OUT("PC: 0x%04X\n", context.PC);
 			exec(context,bus);
-
 			if (context.PC == breakpoint)
 			{
 				breaked = true;
@@ -142,10 +144,15 @@ UINT32 NES_CPU::Exec (UINT32 clock)
 		}
 		else 
 		{
-			if ( (fclocks_left_in_frame >> FRAME_FIXED) < clock )
-				context.clock = (fclocks_left_in_frame >> FRAME_FIXED)+1;
+			if ( (fclocks_left_in_frame >> FRAME_FIXED) < INT64(clocks) )
+			{
+				if (fclocks_left_in_frame < 0)
+					context.clock = 0;
+				else
+					context.clock = unsigned int(fclocks_left_in_frame >> FRAME_FIXED)+1;
+			}
 			else
-				context.clock = clock;
+				context.clock = clocks;
 		}
 		if (nsf2_irq) nsf2_irq->Clock(context.clock-clock_start);
 
@@ -167,10 +174,13 @@ UINT32 NES_CPU::Exec (UINT32 clock)
 			{
 				if (nmi_play) // trigger play by NMI
 				{
-					if (log_cpu)
-						log_cpu->Play();
-					context.iRequest |= IRQ_NMI;
-					breaked = false;
+					if (enable_nmi)
+					{
+						if (log_cpu)
+							log_cpu->Play();
+						context.iRequest |= IRQ_NMI;
+						breaked = false;
+					}
 					play_ready = false;
 				}
 				else
@@ -257,6 +267,7 @@ void NES_CPU::Reset ()
   context.illegal = 0;
   breaked = false;
   irqs = 0;
+  stolen_cycles = 0;
   play_ready = false;
   exec(context, bus);
 }
@@ -268,7 +279,7 @@ void NES_CPU::Start (
 	int song_,
 	int region_,
 	UINT8 nsf2_bits_,
-	bool enable_irqs_,
+	bool enable_irq_,
 	NSF2_IRQ* nsf2_irq_)
 {
 	// approximate frame timing as an integer number of CPU clocks
@@ -276,16 +287,18 @@ void NES_CPU::Start (
 	play_addr = play_addr_;
 	song = song_;
 	region = region_;
-	fclocks_per_frame = (int)((double)((1 << FRAME_FIXED) * NES_BASECYCLES) / play_rate );
+	fclocks_per_frame = (INT64)((double)((1 << FRAME_FIXED) * nes_basecycles) / play_rate );
 	fclocks_left_in_frame = 0;
+	stolen_cycles = 0;
 	play_ready = false;
 	irqs = 0;
 	nsf2_bits = nsf2_bits_;
 	nsf2_irq = nsf2_irq_;
-	enable_irqs = enable_irqs_;
+	enable_irq = enable_irq_;
+	enable_nmi = false;
 
 	// enable NSF2 IRQ
-	if (nsf2_bits & 0x10) enable_irqs = true;
+	if (nsf2_bits & 0x10) enable_irq = true;
 	else nsf2_irq = NULL;
 
 	// NSF2 disable PLAY
@@ -307,22 +320,35 @@ void NES_CPU::Start (
 
 	context.A = song;
 	context.X = region;
-	context.Y = 0;
+	context.Y = extra_init ? 0x80 : 0;
 	context.P = 0x26; // VIZ
 
 	run_from (init_addr);
 
-	// run up to 60 frames of init before starting real playback (this allows INIT to modify $4011 etc. silently)
-	int timeout = int((60.0 * NES_BASECYCLES) / play_rate);
-	// TODO use real exec??
-	for (int i = 0; (i < timeout) && !breaked; i++, exec(context,bus))
+	// temporarily disable PLAY for INIT
+	int play_addr_temp = play_addr;
+	play_addr = -1;
+
+	// run up to 1 second of init before starting real playback (this allows INIT to modify $4011 etc. silently)
+	// note: things like DMC, Frame Counter, NSF2 IRQ, MMC Frame Counter, etc. aren't receiving cycles here
+	//       but this should be OK?
+	//       - Use of IRQs should really be taking place in PLAY or non-returning second INIT.
+	//       - Timing between end of INIT and first PLAY is not guaranteed by the player and should not be relied on.
+	//       - For NSFs that do not reset $4017 this leaves the envelope starting in synch with the first PLAY.
+	//       - Waiting on an IRQ during the first init should hit the timeout and eventually trigger.
+	//         (Could be a problem if they're trying to count cycles there?)
+	int timeout = int(nes_basecycles);
+	while (timeout > 0)
 	{
-		if (context.PC == breakpoint)
+		timeout -= Exec(1);
+		if (breaked)
 		{
-			breaked = true;
+			if (nmi_play) enable_nmi = true;
 		}
 	}
+	play_addr = play_addr_temp; // restore PLAY
 
+	// start of first frame
 	fclocks_left_in_frame = fclocks_per_frame;
 	play_ready = breaked && !extra_init;
 }
@@ -337,9 +363,19 @@ unsigned int NES_CPU::GetPC() const
 	return context.PC;
 }
 
+void NES_CPU::StealCycles(unsigned int cycles)
+{
+	stolen_cycles += cycles;
+}
+
+void NES_CPU::EnableNMI(bool enable)
+{
+	enable_nmi = enable;
+}
+
 void NES_CPU::UpdateIRQ(int device, bool irq)
 {
-	if (!enable_irqs) return;
+	if (!enable_irq) return;
 	if (device < 0 || device >= IRQD_COUNT) return;
 	UINT32 mask = 1 << device;
 	irqs &= ~mask;

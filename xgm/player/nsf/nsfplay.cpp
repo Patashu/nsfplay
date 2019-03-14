@@ -159,29 +159,33 @@ namespace xgm
         cpu.SetLogger(NULL);
     }
 
-    // setup player program
+    // setup player program at PLAYER_RESERVED ($4100)
     const UINT8 PLAYER_PROGRAM[] =
     {
-        0x20, 0x14, 0x41, // $4100 JSR PLAY ($4114 is a placeholder RTS)
+        0x20, 0x1E, 0x41, // $4100 JSR PLAY ($411E is a placeholder RTS)
         0x4C, 0x03, 0x41, // $4103 JMP to self (do nothing loop for detecting end of frame)
         0x48, 0x8A, 0x48, 0x98, 0x48, // $4106 PHA TXA PHA TYA PHA
-        0x20, 0x14, 0x41, // $410B JSR PLAY for non-returning INIT
-        0x68, 0xA8, 0x68, 0xAA, 0x68, // $410E PLA TAY PLA TAX PLA
-        0x40, // $4113 RTI
-        0x60, // $4114 RTS
+        0xA9, 0x00, 0x8D, 0x00, 0x20, // $410B LDA #$00 STA $2000 (disable NMI re-entry)
+        0x20, 0x1E, 0x41, // $4110 JSR PLAY for non-returning INIT ($411E placeholder)
+        0xA9, 0x80, 0x8D, 0x00, 0x20, // $4113 LDA #$80 STA $2000 (re-enable NMI)
+        0x68, 0xA8, 0x68, 0xAA, 0x68, // $4118 PLA TAY PLA TAX PLA
+        0x40, // $411D RTI
+        0x60, // $411E RTS
     };
     const int PLAYER_PROGRAM_SIZE = sizeof(PLAYER_PROGRAM);
     mem.SetReserved(PLAYER_PROGRAM, PLAYER_PROGRAM_SIZE);
-    // PLAYER_RESERVED is at $4100
+    // Note: PLAYER_RESERVED+1,2 are used directly in nes_cpu.cpp.
+    //       If the JSR PLAY at the start ever moves or changes, be sure to update that.
 
     if (nsf->nsf2_bits & 0x30) // uses IRQ or non-returning INIT
     {
         layer.Attach(&nsf2_vectors);
+        nsf2_vectors.SetCPU(&cpu);
         nsf2_vectors.ForceVector(0,PLAYER_RESERVED+0x06); // NMI routine that calls PLAY
         nsf2_vectors.ForceVector(1,PLAYER_RESERVED+0x03); // Reset routine goes to "breaked" infinite loop (not used)
-        nsf2_vectors.ForceVector(2,PLAYER_RESERVED+0x13); // Default IRQ points to empty RTI.
-        mem.Write(0x410C,nsf->play_address & 0xFF);
-        mem.Write(0x410D,nsf->play_address >> 8);
+        nsf2_vectors.ForceVector(2,PLAYER_RESERVED+0x1D); // Default IRQ points to empty RTI.
+        mem.Write(PLAYER_RESERVED+0x11,nsf->play_address & 0xFF);
+        mem.Write(PLAYER_RESERVED+0x12,nsf->play_address >> 8);
     }
     if (nsf->nsf2_bits & 0x10) // uses IRQ
     {
@@ -201,10 +205,15 @@ namespace xgm
     mixer.Attach (&amp[APU]);
     mixer.Attach (&amp[DMC]);
 
+    rconv.SetCPU(&cpu);
+    rconv.SetDMC(dmc);
+    rconv.SetMMC5(NULL);
+
     if (nsf->use_mmc5)
     {
       stack.Attach (sc[MMC5]);
       mixer.Attach (&amp[MMC5]);
+      rconv.SetMMC5(mmc5);
     }
     if (nsf->use_vrc6)
     {
@@ -213,6 +222,11 @@ namespace xgm
     }
     if (nsf->use_vrc7)
     {
+      int patch_set = (*config)["VRC7_PATCH"].GetInt();
+      if (nsf->vrc7_type == 1) // YM2413 (not properly implemented yet though)
+        patch_set = 6;
+      vrc7->SetPatchSet(patch_set);
+      vrc7->SetPatchSetCustom(nsf->vrc7_patches);
       stack.Attach (sc[VRC7]);
       mixer.Attach (&amp[VRC7]);
     }
@@ -309,6 +323,7 @@ void NSFPlayer::SetPlayFreq (double r)
 	}
 	rconv.SetClock(oversample);
 	rconv.SetRate(rate);
+	rconv.SetFastSkip(config->GetValue("FAST_SEEK")!=0);
 
 	mixer.Reset();
 	rconv.Reset();
@@ -345,13 +360,13 @@ void NSFPlayer::SetPlayFreq (double r)
     {
         default:
         case REGION_NTSC:
-            cpu.NES_BASECYCLES = config->GetValue("NTSC_BASECYCLES").GetInt();
+            cpu.nes_basecycles = config->GetValue("NTSC_BASECYCLES").GetInt();
             break;
         case REGION_PAL:
-            cpu.NES_BASECYCLES = config->GetValue("PAL_BASECYCLES").GetInt();
+            cpu.nes_basecycles = config->GetValue("PAL_BASECYCLES").GetInt();
             break;
         case REGION_DENDY:
-            cpu.NES_BASECYCLES = config->GetValue("DENDY_BASECYCLES").GetInt();
+            cpu.nes_basecycles = config->GetValue("DENDY_BASECYCLES").GetInt();
             break;
     }
 
@@ -415,8 +430,6 @@ void NSFPlayer::SetPlayFreq (double r)
     vrc7->SetMask((*config)["MASK"].GetInt()>>15);
     n106->SetMask((*config)["MASK"].GetInt()>>21);
 
-    vrc7->SetPatchSet((*config)["VRC7_PATCH"].GetInt());
-
     for(int i=0;i<NES_TRACK_MAX;i++)
       infobuf[i].Clear();
 
@@ -468,9 +481,10 @@ void NSFPlayer::SetPlayFreq (double r)
   UINT32 NSFPlayer::Skip (UINT32 length)
   {
     if (length)
-    { 
-      double apu_clock_per_sample = cpu.NES_BASECYCLES / rate;
-      double cpu_clock_per_sample = apu_clock_per_sample * ((double)((*config)["MULT_SPEED"].GetInt())/256.0);
+    {
+      int mult_speed = (*config)["MULT_SPEED"].GetInt();
+      double apu_clock_per_sample = cpu.nes_basecycles / rate;
+      double cpu_clock_per_sample = apu_clock_per_sample * ((double)(mult_speed)/256.0);
 
       for (UINT32 i = 0; i < length; i++)
       {
@@ -479,29 +493,32 @@ void NSFPlayer::SetPlayFreq (double r)
         // tick CPU
         cpu_clock_rest += cpu_clock_per_sample;
         int cpu_clocks = (int)(cpu_clock_rest);
-        if (cpu_clocks > 0)
-        {
-            UINT32 real_cpu_clocks = cpu.Exec ( cpu_clocks );
-            cpu_clock_rest -= (double)(real_cpu_clocks);
+        // Moved to RateConverter:
+        //if (cpu_clocks > 0)
+        //{
+        //    UINT32 real_cpu_clocks = cpu.Exec ( cpu_clocks );
+        //    cpu_clock_rest -= (double)(real_cpu_clocks);
+        //
+        //  // tick APU frame sequencer
+        //  dmc->TickFrameSequence(real_cpu_clocks);
+        //  if (nsf->use_mmc5)
+        //      mmc5->TickFrameSequence(real_cpu_clocks);
+        //}
+        rconv.TickCPU(cpu_clocks);
+        cpu_clock_rest -= double(cpu_clocks);
 
-            // tick APU frame sequencer
-            dmc->TickFrameSequence(real_cpu_clocks);
-            if (nsf->use_mmc5)
-                mmc5->TickFrameSequence(real_cpu_clocks);
-        }
-
-        // skip APU / expansions
         apu_clock_rest += apu_clock_per_sample;
         int apu_clocks = (int)(apu_clock_rest);
         if (apu_clocks > 0)
         {
-            //fader.Tick(apu_clocks);
+            fader.Tick(apu_clocks); // ticks CPU via rconv as well
             apu_clock_rest -= (double)(apu_clocks);
         }
+
+        fader.Skip(); // execute CPU/APU ticks via rconv.Skip
       }
 
-      fader.Skip (length);
-      time_in_ms += (int)(1000 * length / rate * ((*config)["MULT_SPEED"].GetInt()) / 256) ;
+      time_in_ms += (int)(1000 * length / rate * mult_speed / 256) ;
       CheckTerminal ();
       DetectLoop ();
     }
@@ -547,6 +564,9 @@ void NSFPlayer::SetPlayFreq (double r)
       {
         for(i=0; i<6; i++)
           infobuf[VRC7_TRK0+i].AddInfo(total_render,vrc7->GetTrackInfo(i));
+        if (nsf->vrc7_type == 1)
+          for(i=6; i<9; i++)
+            infobuf[VRC7_TRK6+i-6].AddInfo(total_render,vrc7->GetTrackInfo(i));
       }
 
       if(nsf->use_mmc5)
@@ -587,8 +607,9 @@ void NSFPlayer::SetPlayFreq (double r)
 
     master_volume = (*config)["MASTER_VOLUME"];
 
-    double apu_clock_per_sample = cpu.NES_BASECYCLES / rate;
-    double cpu_clock_per_sample = apu_clock_per_sample * ((double)((*config)["MULT_SPEED"].GetInt())/256.0);
+    int mult_speed = (*config)["MULT_SPEED"].GetInt();
+    double apu_clock_per_sample = cpu.nes_basecycles / rate;
+    double cpu_clock_per_sample = apu_clock_per_sample * ((double)(mult_speed)/256.0);
 
     for (i = 0; i < length; i++)
     {
@@ -597,20 +618,22 @@ void NSFPlayer::SetPlayFreq (double r)
       // tick CPU
       cpu_clock_rest += cpu_clock_per_sample;
       int cpu_clocks = (int)(cpu_clock_rest);
-      if (cpu_clocks > 0)
-      {
-          UINT32 real_cpu_clocks = cpu.Exec ( cpu_clocks );
-          cpu_clock_rest -= (double)(real_cpu_clocks);
+      // Moved to RateConverter:
+      //if (cpu_clocks > 0)
+      //{
+      //    UINT32 real_cpu_clocks = cpu.Exec ( cpu_clocks );
+      //    cpu_clock_rest -= (double)(real_cpu_clocks);
+      //
+      //    // tick APU frame sequencer
+      //    dmc->TickFrameSequence(real_cpu_clocks);
+      //    if (nsf->use_mmc5)
+      //        mmc5->TickFrameSequence(real_cpu_clocks);
+      //}
+      //UpdateInfo();
+      rconv.TickCPU(cpu_clocks);
+      cpu_clock_rest -= double(cpu_clocks);
 
-          // tick APU frame sequencer
-          dmc->TickFrameSequence(real_cpu_clocks);
-          if (nsf->use_mmc5)
-              mmc5->TickFrameSequence(real_cpu_clocks);
-      }
-
-      UpdateInfo();
-
-      // tick APU / expansions
+      // tick fader and queue accumulated ticks for APU/CPU to be done during Render
       apu_clock_rest += apu_clock_per_sample;
       int apu_clocks = (int)(apu_clock_rest);
       if (apu_clocks > 0)
@@ -620,7 +643,7 @@ void NSFPlayer::SetPlayFreq (double r)
       }
 
       // render output
-      fader.Render(buf);
+      fader.Render(buf); // ticks APU/CPU and renders with subdivision and resampling (also does UpdateInfo)
       outm = (buf[0] + buf[1]) >> 1; // mono mix
       if (outm == last_out) silent_length++; else silent_length = 0;
       last_out = outm;
@@ -652,9 +675,11 @@ void NSFPlayer::SetPlayFreq (double r)
               b[0] = outm;
       }
       b += nch;
+
+      UpdateInfo();
     }
 
-    time_in_ms += (int)(1000 * length / rate * ((*config)["MULT_SPEED"].GetInt()) / 256);
+    time_in_ms += (int)(1000 * length / rate * mult_speed / 256);
 
     CheckTerminal ();
     DetectLoop ();

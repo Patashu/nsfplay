@@ -27,11 +27,13 @@ protected:
   int region;
   K6502_Context context;
   bool breaked;
-  UINT32 fclocks_per_frame; // fCPU clocks per frame timer with fixed point precision
-  UINT32 fclocks_left_in_frame;
+  INT64 fclocks_per_frame; // fCPU clocks per frame timer with fixed point precision
+  INT64 fclocks_left_in_frame;
   UINT32 breakpoint;
   UINT32 irqs;
-  bool enable_irqs;
+  unsigned int stolen_cycles;
+  bool enable_irq;
+  bool enable_nmi;
   bool extra_init;
   bool nmi_play;
   bool play_ready;
@@ -43,7 +45,7 @@ protected:
   void run_from (UINT32 address);
 
 public:
-  double NES_BASECYCLES;
+  double nes_basecycles;
   NES_CPU (double clock = DEFAULT_CLOCK);
   ~NES_CPU ();
   void Reset ();
@@ -54,14 +56,16 @@ public:
     int song_,
     int region_,
     UINT8 nsf2_bits_,
-    bool enable_irqs_,
+    bool enable_irq_,
     NSF2_IRQ* nsf2_irq_);
-  UINT32 Exec (UINT32 clock); // returns number of clocks executed
+  int Exec (int clock); // returns number of clocks executed
   void SetMemory (IDevice *);
   bool Read (UINT32 adr, UINT32 & val, UINT32 id=0);
   bool Write (UINT32 adr, UINT32 val, UINT32 id=0);
   void SetLogger (CPULogger *logger);
   unsigned int GetPC() const;
+  void StealCycles(unsigned int cycles);
+  void EnableNMI(bool enable);
 
   // IRQ devices
   enum {
@@ -70,9 +74,7 @@ public:
     IRQD_NSF2 = 2,
 	IRQD_COUNT
   };
-
   void UpdateIRQ(int device, bool on);
-  void EnableIRQ(bool enable);
 };
 
 } // namespace xgm
