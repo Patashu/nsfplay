@@ -54,6 +54,7 @@ static const int NUM_OCTAVES = 10;
   int numberofframes;
   //int lastnumberofframes;
   int synth_speed;
+  int sharp_brightness;
 
   static const int NES_TRACK_MAX = 31;
 

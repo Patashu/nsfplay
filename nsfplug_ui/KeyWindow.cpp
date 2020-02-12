@@ -194,8 +194,15 @@ void KeyWindow::draw_notes(CDC *pDC, int x, int y, int nx, int ny)
 
 	    if (synthesiarect.left == synthesiarect.right) synthesiarect.right += 1;
 	  
-	    if (key&1)
-		  pDC->FillSolidRect(&synthesiarect, RGB((m_nTrackColor[i][j]&0x0000FF)>>1,(m_nTrackColor[i][j]&0x00FF00)>>9,(m_nTrackColor[i][j]&0xFF0000)>>17));
+        if (key & 1)
+        {
+            int pct = sharp_brightness;
+            pDC->FillSolidRect(&synthesiarect, RGB(
+                ((m_nTrackColor[i][j] & 0x0000FF) * pct) / 100,
+                (((m_nTrackColor[i][j] & 0x00FF00) >> 8)* pct) / 100,
+                (((m_nTrackColor[i][j] & 0xFF0000) >> 16)* pct) / 100
+                ));
+        }
 	    else
 		  pDC->FillSolidRect(&synthesiarect, RGB((m_nTrackColor[i][j])&0xFF,(m_nTrackColor[i][j]>>8)&0xFF,(m_nTrackColor[i][j]>>16)&0xFF));
     }

@@ -192,6 +192,7 @@ void NSFTrackDialog::OnTimer(UINT nIDEvent)
     int time_in_ms;
     time_in_ms = parent->wa2mod->GetOutputTime();
 	m_keydlg.m_keywindow.synth_speed = CONFIG["SYNTH_SPEED"];
+    m_keydlg.m_keywindow.sharp_brightness = CONFIG["SHARP_BRIGHTNESS"];
     m_keydlg.m_keyheader.drums_speed = CONFIG["DRUMS_SPEED"];
 	int delay = (int)CONFIG["INFO_DELAY"];
 	int time_in_ms_with_delay = time_in_ms-delay;

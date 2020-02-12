@@ -101,6 +101,7 @@ NSFPlayerConfig::NSFPlayerConfig () : PlayerConfig ()
   CreateValue("SYNTHESIA_HEIGHT", 400); // How tall the synthesia window is
   CreateValue("DRUMS_HEIGHT", 60); // How tall the drums window is
   CreateValue("STARTING_OCTAVE", 1); // What numbered octave should be the furthest left. Yes, negative numbers work
+  CreateValue("SHARP_BRIGHTNESS", 60); // What % brightness sharp notes have compared to non-sharp notes
   CreateValue("VRC7_PATCH", 0); // VRC7 patch set
   CreateValue("NSFE_PLAYLIST", 1); // use NSFe playlist
 
