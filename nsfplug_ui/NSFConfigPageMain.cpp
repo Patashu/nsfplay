@@ -70,7 +70,7 @@ void NSFConfigPageMain::UpdateNSFPlayerConfig(bool b)
     m_nHpfValue       = 256 - CONFIG["HPF"];
     m_nLpfValue       = CONFIG["LPF"];
     m_bMaskInit       = CONFIG["MASK_INIT"];
-    m_format          = CString(CONFIG["TITLE_FORMAT"]);
+    //m_format          = CString(CONFIG["TITLE_FORMAT"]);
     m_bUseAlt         = !(int)CONFIG["DETECT_ALT"];
     m_bVsync          = CONFIG["VSYNC_ADJUST"];
     m_nRegion         = CONFIG["REGION"];

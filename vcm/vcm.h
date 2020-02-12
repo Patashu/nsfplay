@@ -12,6 +12,7 @@
 
 struct IUnknown;
 #include <windows.h> // for thread safety
+#include <stdexcept>
 
 namespace vcm
 {
