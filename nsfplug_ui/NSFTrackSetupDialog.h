@@ -42,4 +42,8 @@ public:
   CStatic m_sharp_brightness_text;
   BOOL m_graphic_mode;
   BOOL m_freq_mode;
+  UINT m_drums_height_value;
+  UINT m_synthesia_height_value;
+  UINT m_synthesia_width_value;
+  UINT m_starting_octave_value;
 };

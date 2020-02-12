@@ -44,6 +44,14 @@ void NSFTrackSetupDialog::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_SHARP_BRIGHTNESS_TEXT, m_sharp_brightness_text);
   DDX_Check(pDX, IDC_GRAPHIC_MODE, m_graphic_mode);
   DDX_Check(pDX, IDC_FREQ_MODE, m_freq_mode);
+  DDX_Text(pDX, IDC_DRUMS_HEIGHT, m_drums_height_value);
+  DDV_MinMaxUInt(pDX, m_drums_height_value, 10, 10000);
+  DDX_Text(pDX, IDC_SYNTHESIA_HEIGHT, m_synthesia_height_value);
+  DDV_MinMaxUInt(pDX, m_synthesia_height_value, 10, 10000);
+  DDX_Text(pDX, IDC_SYNTHESIA_WIDTH, m_synthesia_width_value);
+  DDV_MinMaxUInt(pDX, m_synthesia_width_value, 10, 10000);
+  DDX_Text(pDX, IDC_STARTING_OCTAVE, m_starting_octave_value);
+  DDV_MinMaxInt(pDX, m_starting_octave_value, 0, 10);
 }
 
 

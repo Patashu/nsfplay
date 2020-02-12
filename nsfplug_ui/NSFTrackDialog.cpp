@@ -68,6 +68,10 @@ void NSFTrackDialog::UpdateNSFPlayerConfig(bool b)
 	m_setup.m_synth_speed_value = CONFIG["SYNTH_SPEED"];
 	m_setup.m_drums_speed_value = CONFIG["DRUMS_SPEED"];
     m_setup.m_sharp_brightness_value = CONFIG["SHARP_BRIGHTNESS"];
+    m_setup.m_synthesia_width_value = CONFIG["SYNTHESIA_WIDTH"];
+    m_setup.m_synthesia_height_value = CONFIG["SYNTHESIA_HEIGHT"];
+    m_setup.m_drums_height_value = CONFIG["DRUMS_HEIGHT"];
+    m_setup.m_starting_octave_value = CONFIG["STARTING_OCTAVE"];
     for(int trk=0;trk<m_maxtrk;trk++)
 	{
         m_trkinfo.SetCheck(trk,( (CONFIG["MASK"]>>m_trkmap[trk])&0x1) == 0 ? true : false);
@@ -83,6 +87,10 @@ void NSFTrackDialog::UpdateNSFPlayerConfig(bool b)
 	CONFIG["SYNTH_SPEED"] = m_setup.m_synth_speed_value;
 	CONFIG["DRUMS_SPEED"] = m_setup.m_drums_speed_value;
     CONFIG["SHARP_BRIGHTNESS"] = m_setup.m_sharp_brightness_value;
+    CONFIG["SYNTHESIA_WIDTH"] = m_setup.m_synthesia_width_value;
+    CONFIG["SYNTHESIA_HEIGHT"] = m_setup.m_synthesia_height_value;
+    CONFIG["DRUMS_HEIGHT"] = m_setup.m_drums_height_value;
+    CONFIG["STARTING_OCTAVE"] = m_setup.m_starting_octave_value;
   }
 }
 
