@@ -136,6 +136,7 @@
 #define ID_DELONE                       2009
 #define IDC_PREF_PAL                    2009
 #define IDC_VSYNC2                      2009
+#define IDC_SHARP_BRIGHTNESS            2009
 #define ID_DELALL                       2010
 #define IDC_GRAPHIC_MODE                2010
 #define IDC_STEREO                      2010
@@ -147,6 +148,8 @@
 #define IDC_IRQENABLE                   2012
 #define IDC_LIMIT                       2013
 #define IDC_UNMUTE                      2013
+#define IDC_SHARPBRIGHTNESS_TEXT        2013
+#define IDC_SHARP_BRIGHTNESS_TEXT       2013
 #define IDC_TRI_MUTE                    2014
 #define IDC_VELOCITY                    2015
 #define ID_READTAG                      2018
@@ -169,6 +172,10 @@
 #define IDD_TRKINFO                     2039
 #define IDC_DUTY_SWAP                   2039
 #define ID_TRKINFO                      2040
+#define IDC_DRUMS_HEIGHT                2041
+#define IDC_SYNTHESIA_HEIGHT            2042
+#define IDC_SYNTHESIA_WIDTH             2043
+#define IDC_STARTING_OCTAVE             2044
 #define IDD_TRKINFO_SETUP               2058
 #define IDB_DIGIT                       2062
 #define IDB_KEYBOARD                    2063
@@ -235,9 +242,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        2098
+#define _APS_NEXT_RESOURCE_VALUE        2099
 #define _APS_NEXT_COMMAND_VALUE         32786
-#define _APS_NEXT_CONTROL_VALUE         2040
+#define _APS_NEXT_CONTROL_VALUE         2042
 #define _APS_NEXT_SYMED_VALUE           2000
 #endif
 #endif

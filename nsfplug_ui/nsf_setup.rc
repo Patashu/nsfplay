@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Japanese resources
+// Japanese (Japan) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
-#ifdef _WIN32
 LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
 #pragma code_page(932)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -94,9 +92,9 @@ END
 
 #if defined(APSTUDIO_INVOKED) || defined(JAPANESE)
 #if defined(APSTUDIO_INVOKED)
-IDD_MEMWRITE$(JAPANESE) DIALOG  0, 0, 194, 125
+IDD_MEMWRITE$(JAPANESE) DIALOG 0, 0, 194, 125
 #else
-IDD_MEMWRITE DIALOG  0, 0, 194, 125
+IDD_MEMWRITE DIALOG 0, 0, 194, 125
 #endif
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "書き込み"
@@ -652,9 +650,13 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDI_NSF                 ICON                    "res\\nsf.ico"
+
 IDI_NSFPLUG             ICON                    "nsfplug.ico"
+
 IDI_MIXER               ICON                    "icon2.ico"
+
 IDI_MEMORY              ICON                    "ico00001.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -663,9 +665,9 @@ IDI_MEMORY              ICON                    "ico00001.ico"
 
 #if defined(APSTUDIO_INVOKED) || defined(JAPANESE)
 #if defined(APSTUDIO_INVOKED)
-IDR_MIXMENU$(JAPANESE) MENU 
+IDR_MIXMENU$(JAPANESE) MENU
 #else
-IDR_MIXMENU MENU 
+IDR_MIXMENU MENU
 #endif
 BEGIN
     POPUP "操作(&C)"
@@ -679,9 +681,9 @@ END
 
 #if defined(APSTUDIO_INVOKED) || defined(JAPANESE)
 #if defined(APSTUDIO_INVOKED)
-IDR_MEMMENU$(JAPANESE) MENU 
+IDR_MEMMENU$(JAPANESE) MENU
 #else
-IDR_MEMMENU MENU 
+IDR_MEMMENU MENU
 #endif
 BEGIN
     POPUP "フォント(&F)"
@@ -694,9 +696,9 @@ END
 
 #if defined(APSTUDIO_INVOKED) || defined(JAPANESE)
 #if defined(APSTUDIO_INVOKED)
-IDR_INFOMENU$(JAPANESE) MENU 
+IDR_INFOMENU$(JAPANESE) MENU
 #else
-IDR_INFOMENU MENU 
+IDR_INFOMENU MENU
 #endif
 BEGIN
     POPUP "ファイル(&F)"
@@ -728,9 +730,9 @@ END
 
 #if defined(APSTUDIO_INVOKED) || defined(JAPANESE)
 #if defined(APSTUDIO_INVOKED)
-IDR_TRKINFOMENU$(JAPANESE) MENU 
+IDR_TRKINFOMENU$(JAPANESE) MENU
 #else
-IDR_TRKINFOMENU MENU 
+IDR_TRKINFOMENU MENU
 #endif
 BEGIN
     POPUP "編集(&E)"
@@ -743,9 +745,9 @@ END
 
 #if defined(APSTUDIO_INVOKED) || defined(JAPANESE)
 #if defined(APSTUDIO_INVOKED)
-IDR_PANMENU$(JAPANESE) MENU 
+IDR_PANMENU$(JAPANESE) MENU
 #else
-IDR_PANMENU MENU 
+IDR_PANMENU MENU
 #endif
 BEGIN
     POPUP "操作(&C)"
@@ -765,7 +767,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     "IDD_MIXER$(JAPANESE)", DIALOG
     BEGIN
@@ -954,17 +956,22 @@ END
 //
 
 IDB_DIGIT               BITMAP                  "res\\digit.bmp"
+
 IDB_KEYBOARD            BITMAP                  "res\\keyboard.bmp"
+
 IDB_ASCII               BITMAP                  "res\\ascii.bmp"
+
 IDB_KEYHEADER           BITMAP                  "res\\keyheader.bmp"
+
 IDB_MAIN                BITMAP                  "res\\bitmap1.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_CANCEL              "CANCEL"
     IDS_APPLY               "&APPLY"
@@ -974,7 +981,7 @@ BEGIN
     IDS_FOUNDTAG            "タグ情報が存在します。"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RCONV0              "サンプル レート コンバータ(簡易): サンプル レート変換の質は標準的ですが、パフォーマンスは最も速くなります"
     IDS_RCONV1              "サンプル レート コンバータ (標準): サンプル レート変換の質も良く、パフォーマンスも速くなります(推奨)"
@@ -982,23 +989,21 @@ BEGIN
     IDS_RCONV3              "サンプル レート コンバータ (最高): サンプル レート 変換の質は最高になりますが、パフォーマンスは遅くなります"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_MIXER                "ミキサー"
 END
 
-#endif    // Japanese resources
+#endif    // Japanese (Japan) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -1255,28 +1260,39 @@ BEGIN
     LTEXT           "NTSC",IDC_PAL,189,50,20,10,SS_SUNKEN
 END
 
-IDD_TRKINFO_SETUP DIALOGEX 0, 0, 186, 138
+IDD_TRKINFO_SETUP DIALOGEX 0, 0, 187, 246
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Settings"
 FONT 8, "MS Shell Dlg", 400, 0, 0x80
 BEGIN
     LTEXT           "&Frequency",IDC_STATIC,7,8,33,8
     CONTROL         "",IDC_FREQ,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,41,7,100,12
-    LTEXT           "??????",IDC_FREQ_TEXT,146,8,33,8
+    LTEXT           "??????",IDC_FREQ_TEXT,147,8,33,8
     LTEXT           "&Delay",IDC_STATIC,8,28,33,8
     CONTROL         "",IDC_DELAY,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,41,27,100,12
-    LTEXT           "??????",IDC_DELAY_TEXT,146,29,33,8
+    LTEXT           "??????",IDC_DELAY_TEXT,147,29,33,8
     CONTROL         "Display wave patterns with &number.",IDC_GRAPHIC_MODE,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,87,124,11
     CONTROL         "Display the frequency &registers.",IDC_FREQ_MODE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,102,127,11
-    DEFPUSHBUTTON   "OK",IDOK,38,117,50,14
-    PUSHBUTTON      "CANCEL",IDCANCEL,93,117,50,14
-    LTEXT           "&Synthesia Speed",IDC_STATIC,7,46,33,17
+    DEFPUSHBUTTON   "OK",IDOK,38,225,50,14
+    PUSHBUTTON      "CANCEL",IDCANCEL,93,225,50,14
+    LTEXT           "&Synthesia Speed",IDC_STATIC,7,44,33,17
     CONTROL         "",IDC_SYNTH_SPEED,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,41,48,100,12
-    LTEXT           "??????",IDC_SYNTH_SPEED_TEXT,146,49,33,8
-    LTEXT           "Synthesia Drum Speed",IDC_STATIC,7,69,40,16
+    LTEXT           "??????",IDC_SYNTH_SPEED_TEXT,147,49,33,8
+    LTEXT           "Drums Height (60)",IDC_STATIC,7,114,40,16
     CONTROL         "",IDC_DRUMS_SPEED,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,41,67,100,12
-    LTEXT           "??????",IDC_DRUMS_SPEED_TEXT,146,68,33,8
+    LTEXT           "??????",IDC_DRUMS_SPEED_TEXT,147,68,33,8
+    EDITTEXT        IDC_DRUMS_HEIGHT,51,116,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Synthesia Drum Speed",IDC_STATIC,7,63,32,23
+    EDITTEXT        IDC_SYNTHESIA_HEIGHT,51,135,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Synthesia Height (400)",IDC_STATIC,7,132,40,16
+    LTEXT           "Synthesia Width (841)",IDC_STATIC,7,151,40,16
+    EDITTEXT        IDC_SYNTHESIA_WIDTH,51,154,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_STARTING_OCTAVE,51,174,40,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Starting Octave (1)",IDC_STATIC,7,172,40,16
+    CONTROL         "",IDC_SHARP_BRIGHTNESS,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,42,200,100,12
+    LTEXT           "Sharp Brightness (60)",IDC_STATIC,7,193,33,24
+    LTEXT           "??????",IDC_SHARP_BRIGHTNESS_TEXT,147,200,33,8
 END
 
 IDD_TRKINFO DIALOGEX 0, 0, 228, 133
@@ -1426,7 +1442,7 @@ END
 // Menu
 //
 
-IDR_MIXMENU MENU 
+IDR_MIXMENU MENU
 BEGIN
     POPUP "&Command"
     BEGIN
@@ -1436,7 +1452,7 @@ BEGIN
     END
 END
 
-IDR_INFOMENU MENU 
+IDR_INFOMENU MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -1464,7 +1480,7 @@ BEGIN
     END
 END
 
-IDR_TRKINFOMENU MENU 
+IDR_TRKINFOMENU MENU
 BEGIN
     POPUP "&Edit"
     BEGIN
@@ -1473,7 +1489,7 @@ BEGIN
     MENUITEM "&Settings",                   ID_SETTINGS
 END
 
-IDR_PANMENU MENU 
+IDR_PANMENU MENU
 BEGIN
     POPUP "&Command"
     BEGIN
@@ -1491,7 +1507,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_MIXER, DIALOG
     BEGIN
@@ -1582,9 +1598,9 @@ BEGIN
     IDD_TRKINFO_SETUP, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 179
+        RIGHTMARGIN, 180
         TOPMARGIN, 7
-        BOTTOMMARGIN, 131
+        BOTTOMMARGIN, 239
     END
 
     IDD_TRKINFO, DIALOG
@@ -1638,10 +1654,21 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_TRKINFO_SETUP AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_CANCEL              "&Cancel"
     IDS_APPLY               "&Apply"
@@ -1651,7 +1678,7 @@ BEGIN
     IDS_FOUNDTAG            "Found a tag information for this NSF file."
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RCONV0              "Fastest sample rate converter: Provides normal quality sample rate conversion and fastest performance."
     IDS_RCONV1              "Standard sample rate converter: Provides good quality sample rate conversion and faster performance."
@@ -1659,12 +1686,12 @@ BEGIN
     IDS_RCONV3              "Best sample rate converter: Provides best quality sample rate conversion but slowest performance."
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_MIXER                "Mixer"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

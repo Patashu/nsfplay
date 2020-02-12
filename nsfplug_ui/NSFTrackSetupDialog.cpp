@@ -14,6 +14,7 @@ NSFTrackSetupDialog::NSFTrackSetupDialog(CWnd* pParent /*=NULL*/)
   , m_delay_value(0)
   , m_synth_speed_value(0)
   , m_drums_speed_value(0)
+  , m_sharp_brightness_value(0)
   , m_graphic_mode(FALSE)
   , m_freq_mode(FALSE)
 {
@@ -30,14 +31,17 @@ void NSFTrackSetupDialog::DoDataExchange(CDataExchange* pDX)
   DDX_Control(pDX, IDC_FREQ, m_freq);
   DDX_Control(pDX, IDC_SYNTH_SPEED, m_synth_speed);
   DDX_Control(pDX, IDC_DRUMS_SPEED, m_drums_speed);
+  DDX_Control(pDX, IDC_SHARP_BRIGHTNESS, m_sharp_brightness);
   DDX_Slider(pDX, IDC_FREQ, m_freq_value);
   DDX_Slider(pDX, IDC_DELAY, m_delay_value);
   DDX_Slider(pDX, IDC_SYNTH_SPEED, m_synth_speed_value);
   DDX_Slider(pDX, IDC_DRUMS_SPEED, m_drums_speed_value);
+  DDX_Slider(pDX, IDC_SHARP_BRIGHTNESS, m_sharp_brightness_value);
   DDX_Control(pDX, IDC_FREQ_TEXT, m_freq_text);
   DDX_Control(pDX, IDC_DELAY_TEXT, m_delay_text);
   DDX_Control(pDX, IDC_SYNTH_SPEED_TEXT, m_synth_speed_text);
   DDX_Control(pDX, IDC_DRUMS_SPEED_TEXT, m_drums_speed_text);
+  DDX_Control(pDX, IDC_SHARP_BRIGHTNESS_TEXT, m_sharp_brightness_text);
   DDX_Check(pDX, IDC_GRAPHIC_MODE, m_graphic_mode);
   DDX_Check(pDX, IDC_FREQ_MODE, m_freq_mode);
 }
@@ -71,6 +75,10 @@ BOOL NSFTrackSetupDialog::OnInitDialog()
   m_drums_speed.SetTicFreq(1);
   m_drums_speed.SetPageSize(1);
   m_drums_speed.SetLineSize(1);
+  m_sharp_brightness.SetRange(0, 100);
+  m_sharp_brightness.SetTicFreq(1);
+  m_sharp_brightness.SetPageSize(1);
+  m_sharp_brightness.SetLineSize(1);
   UpdateData(FALSE);
 
   return TRUE;  // return TRUE unless you set the focus to a control
@@ -89,6 +97,8 @@ void NSFTrackSetupDialog::OnShowWindow(BOOL bShow, UINT nStatus)
   m_synth_speed_text.SetWindowText(text);
   text.Format("%d",m_drums_speed_value);
   m_drums_speed_text.SetWindowText(text);
+  text.Format("%d", m_sharp_brightness_value);
+  m_sharp_brightness_text.SetWindowText(text);
 }
 
 void NSFTrackSetupDialog::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
@@ -114,6 +124,11 @@ void NSFTrackSetupDialog::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScroll
   {
     text.Format("%d",m_drums_speed.GetPos());
     m_drums_speed_text.SetWindowText(text);
+  }
+  else if ((CSliderCtrl*)pScrollBar == &m_sharp_brightness)
+  {
+      text.Format("%d", m_sharp_brightness.GetPos());
+      m_sharp_brightness_text.SetWindowText(text);
   }
 
   CDialog::OnHScroll(nSBCode, nPos, pScrollBar);

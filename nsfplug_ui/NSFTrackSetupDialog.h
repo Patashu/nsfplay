@@ -26,6 +26,7 @@ public:
   CSliderCtrl m_freq;
   CSliderCtrl m_synth_speed;
   CSliderCtrl m_drums_speed;
+  CSliderCtrl m_sharp_brightness;
   virtual BOOL OnInitDialog();
   afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
   afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
@@ -33,10 +34,12 @@ public:
   int m_delay_value;
   int m_synth_speed_value;
   int m_drums_speed_value;
+  int m_sharp_brightness_value;
   CStatic m_freq_text;
   CStatic m_delay_text;
   CStatic m_synth_speed_text;
   CStatic m_drums_speed_text;
+  CStatic m_sharp_brightness_text;
   BOOL m_graphic_mode;
   BOOL m_freq_mode;
 };

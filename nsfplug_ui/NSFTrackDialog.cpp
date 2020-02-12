@@ -67,6 +67,7 @@ void NSFTrackDialog::UpdateNSFPlayerConfig(bool b)
     m_setup.m_graphic_mode = !(int)CONFIG["GRAPHIC_MODE"];
 	m_setup.m_synth_speed_value = CONFIG["SYNTH_SPEED"];
 	m_setup.m_drums_speed_value = CONFIG["DRUMS_SPEED"];
+    m_setup.m_sharp_brightness_value = CONFIG["SHARP_BRIGHTNESS"];
     for(int trk=0;trk<m_maxtrk;trk++)
 	{
         m_trkinfo.SetCheck(trk,( (CONFIG["MASK"]>>m_trkmap[trk])&0x1) == 0 ? true : false);
@@ -81,6 +82,7 @@ void NSFTrackDialog::UpdateNSFPlayerConfig(bool b)
     CONFIG["GRAPHIC_MODE"] = !m_setup.m_graphic_mode;
 	CONFIG["SYNTH_SPEED"] = m_setup.m_synth_speed_value;
 	CONFIG["DRUMS_SPEED"] = m_setup.m_drums_speed_value;
+    CONFIG["SHARP_BRIGHTNESS"] = m_setup.m_sharp_brightness_value;
   }
 }
 
